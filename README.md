@@ -33,19 +33,19 @@
 ### New Assistant Form
 _A screenshot of the form to create a new assistant._
 
-![New Assistant Form](/images/image1.png)
+![New Assistant Form](./public/images/image1.png)
 
 ### Assistants List
 _A screenshot showing the list of all assistants._
 
-![Assistants List](/images/image2.png)
+![Assistants List](./public/images/image2.png)
 
 ### Assistants List
 _A screenshot showing the form to update a ew assistant._
 
-![Assistants List](/images/image3.png)
+![Assistants List](./public/images/image3.png)
 
 ### Database Update
 _A screenshot showing the database update process._
 
-![Database Update](/images/image4.png)
+![Database Update](./public/images/image4.png)
