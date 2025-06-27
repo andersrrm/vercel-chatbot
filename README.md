@@ -27,3 +27,25 @@
 - The codebase is now cleaner and more professional, with reusable and centralized types.
 - The assistant endpoints are ready for integration with the rest of the chatbot system.
 - Further improvements and features will be added iteratively as needed.
+
+## Screenshots
+
+### New Assistant Form
+_A screenshot of the form to create a new assistant._
+
+![New Assistant Form](/images/imagen1.png)
+
+### Assistants List
+_A screenshot showing the list of all assistants._
+
+![Assistants List](/images/imagen2.png)
+
+### Assistants List
+_A screenshot showing the form to update a ew assistant._
+
+![Assistants List](/images/imagen3.png)
+
+### Database Update
+_A screenshot showing the database update process._
+
+![Database Update](/images/imagen4.png)
