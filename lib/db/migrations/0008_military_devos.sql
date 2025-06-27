@@ -1,0 +1,1 @@
+ALTER TABLE "Assistant" ADD COLUMN "deletedAt" timestamp;

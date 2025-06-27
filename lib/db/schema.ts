@@ -26,6 +26,7 @@ export const chat = pgTable('Chat', {
   userId: uuid('userId')
     .notNull()
     .references(() => user.id),
+  assistantId: uuid('assistantId').references(() => assistant.id),
   visibility: varchar('visibility', { enum: ['public', 'private'] })
     .notNull()
     .default('private'),
@@ -115,6 +116,7 @@ export const document = pgTable(
     userId: uuid('userId')
       .notNull()
       .references(() => user.id),
+    assistantId: uuid('assistantId').references(() => assistant.id),
   },
   (table) => {
     return {
@@ -168,3 +170,19 @@ export const stream = pgTable(
 );
 
 export type Stream = InferSelectModel<typeof stream>;
+
+export const assistant = pgTable('Assistant', {
+  id: uuid('id').primaryKey().notNull().defaultRandom(),
+  name: text('name').notNull(),
+  instructions: text('instructions').notNull(),
+  avatar: text('avatar').notNull().default('🤖'),
+  userId: uuid('userId')
+    .notNull()
+    .references(() => user.id),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+  deletedAt: timestamp('deletedAt'),
+});
+
+export type Assistant = typeof assistant.$inferSelect;
+export type NewAssistant = typeof assistant.$inferInsert;

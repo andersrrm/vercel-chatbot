@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { PlusIcon } from '@/components/icons';
 import { SidebarHistory } from '@/components/sidebar-history';
 import { SidebarUserNav } from '@/components/sidebar-user-nav';
+import { SidebarAssistants } from '@/components/assistants';
 import { Button } from '@/components/ui/button';
 import {
   Sidebar,
@@ -17,8 +18,15 @@ import {
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import type { Assistant } from '@/lib/db/schema';
 
-export function AppSidebar({ user }: { user: User | undefined }) {
+export function AppSidebar({
+  user,
+  assistants,
+}: {
+  user: User | undefined;
+  assistants: Assistant[];
+}) {
   const router = useRouter();
   const { setOpenMobile } = useSidebar();
 
@@ -56,9 +64,19 @@ export function AppSidebar({ user }: { user: User | undefined }) {
               <TooltipContent align="end">New Chat</TooltipContent>
             </Tooltip>
           </div>
+          <Link href="/assistants/new" className="w-full">
+            <Button
+              variant="ghost"
+              className="w-full justify-start p-2 h-fit font-semibold"
+              onClick={() => setOpenMobile(false)}
+            >
+              🤖 New Assistant
+            </Button>
+          </Link>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
+        <SidebarAssistants assistants={assistants} />
         <SidebarHistory user={user} />
       </SidebarContent>
       <SidebarFooter>{user && <SidebarUserNav user={user} />}</SidebarFooter>

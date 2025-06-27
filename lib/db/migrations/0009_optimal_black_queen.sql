@@ -1,0 +1,1 @@
+ALTER TABLE "Assistant" ALTER COLUMN "avatar" SET DEFAULT '🤖';

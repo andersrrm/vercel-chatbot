@@ -1,5 +1,6 @@
 import { generateId } from 'ai';
 import { genSaltSync, hashSync } from 'bcrypt-ts';
+import { log } from '../logger';
 
 export function generateHashedPassword(password: string) {
   const salt = genSaltSync(10);
@@ -13,4 +14,14 @@ export function generateDummyPassword() {
   const hashedPassword = generateHashedPassword(password);
 
   return hashedPassword;
+}
+
+export async function withDbErrorLogging<T>(fn: Function, context: any = {}) {
+  try {
+    return await fn();
+  } catch (error) {
+    const functionName = fn.name || 'anonymous';
+    log.error('Database error', { functionName, ...context, error });
+    throw error;
+  }
 }
