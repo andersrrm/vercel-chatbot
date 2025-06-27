@@ -7,18 +7,36 @@ import {
   getAssistantById,
 } from '@/lib/db/assistant-queries';
 import { createAssistantSchema } from '@/lib/validations/assistant';
+import type { AssistantRouteParams } from '@/lib/types';
+
+const createErrorResponse = (message: string, status: number) =>
+  NextResponse.json({ error: message }, { status });
+
+const validateSession = async () => {
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error('Unauthorized');
+  }
+  return session;
+};
+
+const validateAssistantOwnership = async (
+  assistantId: string,
+  userId: string,
+) => {
+  const assistant = await getAssistantById(assistantId);
+  if (!assistant || assistant.userId !== userId) {
+    throw new Error('Assistant not found');
+  }
+  return assistant;
+};
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ assistantId: string }> },
+  { params }: AssistantRouteParams,
 ) {
   try {
-    const session = await auth();
-
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
+    const session = await validateSession();
     const { assistantId } = await params;
 
     const deletedAssistant = await softDeleteAssistant(
@@ -27,43 +45,25 @@ export async function DELETE(
     );
 
     if (!deletedAssistant) {
-      return NextResponse.json(
-        { error: 'Assistant not found' },
-        { status: 404 },
-      );
+      return createErrorResponse('Assistant not found', 404);
     }
 
     return NextResponse.json({ success: true, assistant: deletedAssistant });
   } catch (error) {
     console.error('Error deleting assistant:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 },
-    );
+    return createErrorResponse('Internal server error', 500);
   }
 }
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ assistantId: string }> },
+  { params }: AssistantRouteParams,
 ) {
   try {
-    const session = await auth();
-
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
+    const session = await validateSession();
     const { assistantId } = await params;
 
-    // Check if assistant exists and belongs to user
-    const existingAssistant = await getAssistantById(assistantId);
-    if (!existingAssistant || existingAssistant.userId !== session.user.id) {
-      return NextResponse.json(
-        { error: 'Assistant not found' },
-        { status: 404 },
-      );
-    }
+    await validateAssistantOwnership(assistantId, session.user.id);
 
     const json = await request.json();
     const { name, instructions, avatar } = createAssistantSchema.parse(json);
@@ -79,18 +79,12 @@ export async function PUT(
     );
 
     if (!updatedAssistant) {
-      return NextResponse.json(
-        { error: 'Failed to update assistant' },
-        { status: 500 },
-      );
+      return createErrorResponse('Failed to update assistant', 500);
     }
 
     return NextResponse.json(updatedAssistant);
   } catch (error) {
     console.error('Error updating assistant:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 },
-    );
+    return createErrorResponse('Internal server error', 500);
   }
 }

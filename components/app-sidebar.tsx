@@ -18,15 +18,9 @@ import {
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
-import type { Assistant } from '@/lib/db/schema';
+import type { AppSidebarProps } from '@/lib/types';
 
-export function AppSidebar({
-  user,
-  assistants,
-}: {
-  user: User | undefined;
-  assistants: Assistant[];
-}) {
+export function AppSidebar({ user, assistants }: AppSidebarProps) {
   const router = useRouter();
   const { setOpenMobile } = useSidebar();
 

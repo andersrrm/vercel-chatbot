@@ -1,45 +1,40 @@
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { auth } from '@/app/(auth)/auth';
 import { getAssistantById } from '@/lib/db/assistant-queries';
 import {
   AssistantUpdateForm,
   AssistantUpdatePageHeader,
 } from '@/components/assistants';
+import type { EditAssistantPageProps } from '@/lib/types';
 
-interface EditAssistantPageProps {
-  params: {
-    assistantId: string;
-  };
-}
+const getAssistant = async (assistantId: string, userId: string) => {
+  const assistant = await getAssistantById(assistantId);
+
+  if (!assistant || assistant.userId !== userId) {
+    notFound();
+  }
+
+  return assistant;
+};
+
+const EditPageContent = ({ assistant }: { assistant: any }) => (
+  <div
+    key="overview"
+    className="max-w-3xl mx-auto md:mt-20 px-8 size-full flex flex-col justify-center"
+  >
+    <AssistantUpdatePageHeader />
+    <AssistantUpdateForm assistant={assistant} />
+  </div>
+);
 
 export default async function EditAssistantPage({
   params,
 }: EditAssistantPageProps) {
   const session = await auth();
-
-  if (!session?.user) {
-    redirect(`/sign-in?next=/assistants/${params.assistantId}/edit`);
-  }
-
-  // Get assistant data
-  const assistant = await getAssistantById(params.assistantId);
-
-  if (!assistant) {
-    notFound();
-  }
-
-  // Check if assistant belongs to user
-  if (assistant.userId !== session.user.id) {
-    notFound();
-  }
-
-  return (
-    <div
-      key="overview"
-      className="max-w-3xl mx-auto md:mt-20 px-8 size-full flex flex-col justify-center"
-    >
-      <AssistantUpdatePageHeader />
-      <AssistantUpdateForm assistant={assistant} />
-    </div>
+  const assistant = await getAssistant(
+    params.assistantId,
+    session?.user?.id || '',
   );
+
+  return <EditPageContent assistant={assistant} />;
 }

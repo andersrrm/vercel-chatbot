@@ -7,51 +7,51 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import type { Assistant } from '@/lib/db/schema';
 import { createAssistantSchema } from '@/lib/validations/assistant';
-import { z } from 'zod';
 import { EmojiSelector } from './emoji-selector';
+import type { AssistantUpdateFormProps } from '@/lib/types';
 
-interface AssistantUpdateFormProps {
-  assistant: Assistant;
-}
+const updateAssistant = async (assistantId: string, data: any) => {
+  const response = await fetch(`/api/assistants/${assistantId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Failed to update assistant.');
+  }
+
+  return response.json();
+};
 
 export function AssistantUpdateForm({ assistant }: AssistantUpdateFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedEmoji, setSelectedEmoji] = useState(assistant.avatar);
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsSubmitting(true);
 
-    const formData = new FormData(event.currentTarget);
-    const name = formData.get('name') as string;
-    const instructions = formData.get('instructions') as string;
-
     try {
+      const formData = new FormData(event.currentTarget);
+      const name = formData.get('name') as string;
+      const instructions = formData.get('instructions') as string;
+
       const validatedData = createAssistantSchema.parse({
         name,
         instructions,
         avatar: selectedEmoji,
       });
 
-      const response = await fetch(`/api/assistants/${assistant.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(validatedData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update assistant.');
-      }
-
-      const updatedAssistant: Assistant = await response.json();
+      const updatedAssistant = await updateAssistant(
+        assistant.id,
+        validatedData,
+      );
 
       toast.success('Assistant updated successfully!');
-
-      // Navigate back to the assistant's chat
       router.push(`/chat/assistant/${updatedAssistant.id}`);
     } catch (error) {
       const err = error as any;
@@ -63,7 +63,7 @@ export function AssistantUpdateForm({ assistant }: AssistantUpdateFormProps) {
     } finally {
       setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

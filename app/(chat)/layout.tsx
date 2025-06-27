@@ -1,31 +1,28 @@
 import { cookies } from 'next/headers';
-
 import { AppSidebar } from '@/components/app-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { auth } from '../(auth)/auth';
 import Script from 'next/script';
 import { getAssistantsByUserId } from '@/lib/db/assistant-queries';
+import type { LayoutProps } from '@/lib/types';
 
 export const experimental_ppr = true;
 
-export default async function Layout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+const getAssistants = async (userId?: string) => {
+  if (!userId) return [];
+
+  try {
+    return await getAssistantsByUserId(userId);
+  } catch (error) {
+    console.error('Error fetching assistants:', error);
+    return [];
+  }
+};
+
+export default async function Layout({ children }: LayoutProps) {
   const [session, cookieStore] = await Promise.all([auth(), cookies()]);
   const isCollapsed = cookieStore.get('sidebar:state')?.value !== 'true';
-
-  // Get assistants data directly in the layout
-  let assistants: any[] = [];
-  if (session?.user?.id) {
-    try {
-      assistants = await getAssistantsByUserId(session.user.id);
-    } catch (error) {
-      console.error('Error fetching assistants:', error);
-      assistants = [];
-    }
-  }
+  const assistants = await getAssistants(session?.user?.id);
 
   return (
     <>
